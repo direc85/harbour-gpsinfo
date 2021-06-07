@@ -55,7 +55,7 @@ Page {
             AboutLabel {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.secondaryColor
-                text: qsTr("Version") + " 0.13.2-1"
+                text: qsTr("Version") + " 0.13.3-1"  //Must edit both AboutPage.qml and  harbour-gpsinfo.yaml
             }
 
             AboutLabel {

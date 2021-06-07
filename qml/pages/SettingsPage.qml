@@ -25,6 +25,7 @@ Page {
         } else {
             speedUnitComboBox.currentIndex = settings.speedUnit === "SEC" ? 2 : 3
         }
+
     }
 
     function setLanguageCombobox() {
@@ -144,6 +145,25 @@ Page {
                 valueText: value + "s"
                 width: parent.width
                 onReleased: settings.updateInterval = value
+            }
+            TextField {
+                id: declinationField
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                label: "Magnetic Declination"
+                text: settings.magneticDeclination
+                placeholderText: "manually set local declination"
+                validator: IntValidator {
+                        bottom: 0
+                        top: 359
+                    }
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                EnterKey.onClicked:  {focus = false
+                    settings.magneticDeclination = parseInt(text, 10) //setDeclination(parseInt(text, 10))
+                }
+                function setDeclination(Dec) {
+                    settings.magneticDeclination = Dec
+                }
+
             }
 
             ComboBox {

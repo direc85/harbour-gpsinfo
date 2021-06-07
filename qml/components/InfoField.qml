@@ -4,6 +4,8 @@ import Sailfish.Silica 1.0
 Item {
     property alias label: label.text
     property alias value: value.text
+    property bool highlight: false  //alias highlighted: value.highlighted
+    property alias color: value.color
     property variant fontpixelSize: Theme.fontSizeLarge
     anchors.left: parent.left
     anchors.leftMargin: Theme.paddingMedium
@@ -19,7 +21,7 @@ Item {
     Label {
         id: value
         anchors.right: parent.right
-        color: Theme.secondaryColor
+        color: highlight ? Theme.secondaryHighlightColor : Theme.secondaryColor
         font.pixelSize: fontpixelSize
         text: "Value"
     }

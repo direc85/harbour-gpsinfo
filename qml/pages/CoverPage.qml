@@ -165,18 +165,7 @@ CoverBackground {
 
         CoverAction {
             iconSource: positionSource.active ? "image://theme/icon-cover-pause" : "image://theme/icon-cover-play"
-            onTriggered: {
-                if (positionSource.active) {
-                    console.log("deactivating GPS");
-                    positionSource.stop();
-                    gpsDataSource.active = false;
-                    console.log("active: " + positionSource.active);
-                } else {
-                    console.log("activating GPS");
-                    positionSource.start();
-                    gpsDataSource.active = true;
-                    console.log("active: " + positionSource.active);
-                }
+            onTriggered: { providers.toggleActive()
             }
         }
     }

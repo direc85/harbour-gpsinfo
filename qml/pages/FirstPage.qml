@@ -1,6 +1,6 @@
-import QtQuick 2.0
+import QtQuick 2.0 //2.6
 import Sailfish.Silica 1.0
-import QtPositioning 5.2
+import QtPositioning 5.2 //5.4
 import QtSensors 5.0
 import harbour.gpsinfo 1.0
 import "../components"
@@ -23,7 +23,6 @@ Page {
                            { gpsDataSource: page.gpsDataSource, compass: page.compass})
         }
     }
-
     states: [
         State {
             name: 'landscape';
@@ -38,54 +37,16 @@ Page {
 
     SilicaFlickable {
         anchors.fill: parent
-
-        PullDownMenu {
-            MenuItem {
-                text: qsTr("About")
-                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
-            }
-            MenuItem {
-                text: positionSource.active ? qsTr("Deactivate GPS") : qsTr("Activate GPS")
-                onClicked: {
-                    if (positionSource.active) {
-                        console.log("deactivating GPS");
-                        positionSource.stop();
-                        gpsDataSource.active = false;
-                        console.log("active: " + positionSource.active);
-                    } else {
-                        console.log("activating GPS");
-                        positionSource.start();
-                        gpsDataSource.active = true;
-                        console.log("active: " + positionSource.active);
-                    }
-                }
-            }
-            MenuItem {
-                enabled: gpsDataSource.active
-                text: qsTr("Copy location")
-                onClicked: {
-                    if (settings.coordinateFormat === "DEG") {
-                        Clipboard.text = LocationFormater.decimalLatToDMS(positionSource.position.coordinate.latitude, 2)
-                                + ", "
-                                + LocationFormater.decimalLongToDMS(positionSource.position.coordinate.longitude, 2);
-                    } else {
-                        Clipboard.text = positionSource.position.coordinate.latitude
-                                + ", "
-                                + positionSource.position.coordinate.longitude
-                    }
-                }
-            }
+        MainMenu {
+            id: siMainMenu
+            positionSource: providers.positionSource
         }
 
         contentHeight: pageHeader.height + column.height;
 
         PageHeader {
             id: pageHeader
-            title: qsTr("GPSInfo")
+            title: qsTr("GPS Info")
         }
 
         Column {
@@ -176,8 +137,18 @@ Page {
             InfoField {
                 label: qsTr("Last update")
                 visible: settings.showLastUpdateApp
-                value: positionSource.position.coordinate.isValid ? Qt.formatTime(positionSource.position.timestamp, "hh:mm:ss") : "-"
+                value: ((providers.timing.secsSincePosition > (1 +settings.updateInterval) ) ? //if more than a few secs then also show elapsed time
+                            "-"+providers.timing.formatElapsedTime(providers.timing.secsSincePosition)+"  " : " ")
+                       + (positionSource.position.coordinate.isValid ? Qt.formatTime(positionSource.position.timestamp, "hh:mm:ss") : "-") //always show actual time
             }
+            InfoField {
+                id:ttff
+                label: qsTr("Time to First Fix")
+                visible: settings.showLastUpdateApp
+                value: providers.timing.formatElapsedTime(providers.timing.secs2FF)
+                highlight: providers.timing.secs2FF<0
+            }
+
             InfoField {
                 label: qsTr("Vertical accuracy")
                 visible: settings.showVerticalAccuracyApp
@@ -211,16 +182,41 @@ Page {
                 visible: settings.showSatelliteInfoApp
                 value: gpsDataSource.numberOfUsedSatellites + " / " + gpsDataSource.numberOfVisibleSatellites
             }
+            SectionHeader {
+                visible: settings.showCompassDirectionApp
+                text: "Compass"
+            }
             InfoField {
-                label: qsTr("Compass direction")
+                label: qsTr("Direction")
                 visible: settings.showCompassDirectionApp
                 value: compass.reading === null ? "-" : LocationFormater.formatDirection(compass.reading.azimuth)
             }
             InfoField {
-                label: qsTr("Compass calibration")
-                visible: settings.showCompassCalibrationApp
+                label: qsTr("Calibration")
+                visible: settings.showCompassCalibrationApp && settings.showCompassDirectionApp
                 value: compass.reading === null ? "-" : Math.round(compass.reading.calibrationLevel * 100) + "%"
             }
+            InfoField { //this won't work until QTPositioning V5.4 or maybe 5.2 or, who knows?
+                label: qsTr("Magnetic Variation")
+                visible: settings.showCompassDirectionApp
+                value: {
+                    if (positionSource.position.magneticVariationValid === true) {
+                        var md = LocationFormater.roundToDecimal(positionSource.position.magneticVariation, 1)
+                        return md
+                    } else {
+                        if (positionSource.position.magneticVariationValid === undefined)
+                        return  "req QtPos 5.4"
+                        else return " - "
+
+
+                } }
+            }
+            InfoField {
+                label: qsTr("Magnetic Declination")
+                visible: settings.showCompassDirectionApp && (settings.magneticDeclination >0)
+                value:  LocationFormater.roundToDecimal(settings.magneticDeclination,0)
+            }
+
             // This element is "necessary", because Sony Xperia XA2 Ultra (at least)
             // messes up the column height calculation with only InfoFields...
             Rectangle {

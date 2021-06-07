@@ -15,6 +15,7 @@ DISTFILES += qml/pages/CoverPage.qml \
     qml/QChart/QChart.js \
     qml/QChart/QChart.qml \
     qml/QChart/qmldir \
+    qml/components/MainMenu.qml \
     qml/pages/FirstPage.qml \
     qml/components/InfoField.qml \
     qml/pages/SatelliteBarchartPage.qml \

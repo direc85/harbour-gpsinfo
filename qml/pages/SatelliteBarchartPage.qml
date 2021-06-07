@@ -3,7 +3,7 @@ import Sailfish.Silica 1.0
 import QtPositioning 5.2
 import QtSensors 5.0
 import harbour.gpsinfo 1.0
-import "../QChart"
+import "../QChart"   //must init and update the submodule "git submodule update --init"
 import "../components"
 
 Page {
@@ -25,6 +25,7 @@ Page {
             pageStack.navigateForward(PageStackAction.Immediate)
         }
     }
+
     PageHeader {
         id: header
         title: qsTr("Satellite signal strengths")
@@ -38,7 +39,7 @@ Page {
             bottom: parent.bottom
         }
 
-    Chart {
+    QChart {
         id: rssiBarChart;
         width: parent.width - 2 * Theme.horizontalPageMargin
         height: satelliteBarchartPage.isPortrait ? width : parent.height - 2 * Theme.horizontalPageMargin
@@ -52,9 +53,12 @@ Page {
         Component.onCompleted: {
             chartData = {
                 labels: [],
+                labelsColor: [],
                 datasets: [{
                         data: [],
-                        fillColor: []
+                        fillColor: [],
+                        borderWidth: [],
+                        borderColor: []
                     }]
             }
             chartOptions = {
@@ -91,14 +95,22 @@ Page {
 
                 // Clear the chart data
                 rssiBarChart.chartData.labels = []
+                rssiBarChart.chartData.labelsColor = []
                 rssiBarChart.chartData.datasets[0].data = []
                 rssiBarChart.chartData.datasets[0].fillColor = []
-
+                rssiBarChart.chartData.datasets[0].borderColor = []
+                rssiBarChart.chartData.datasets[0].borderWidth = []
                 // Insert the data
                 results.forEach(function(barSat) {
-                    rssiBarChart.chartData.labels.push(barSat.identifier);
+                    rssiBarChart.chartData.labels.push(barSat.identifier);                    
                     rssiBarChart.chartData.datasets[0].data.push(barSat.signalStrength);
-                    rssiBarChart.chartData.datasets[0].fillColor.push(getRSSI_Color(barSat.signalStrength));
+                    //bar color change is used to show sats inUse
+                    rssiBarChart.chartData.datasets[0].fillColor.push(barSat.inUse ? getRSSI_Color(barSat.signalStrength):Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity))
+                    
+                    rssiBarChart.chartData.labelsColor.push(barSat.inUse ? Theme.HighlightColor: Theme.secondaryHighlightColor );
+                    rssiBarChart.chartData.datasets[0].borderWidth.push(Theme.fontSizeTiny / 10.0)
+                    rssiBarChart.chartData.datasets[0].borderColor.push(barSat.inUse ? "white" : "transparent");
+
                 });
 
                 // Draw minimum of 5 (10) bars in portrait (landscape)
@@ -128,3 +140,4 @@ Page {
         visible: parent.isPortrait
     }
 }
+

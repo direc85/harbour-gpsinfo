@@ -39,6 +39,7 @@ class GPSInfoSettings : public QMLSettingsWrapper
     Q_PROPERTY(int updateInterval READ getUpdateInterval WRITE setUpdateInterval NOTIFY updateIntervalChanged)
     Q_PROPERTY(bool rotate READ getRotate WRITE setRotate NOTIFY rotateChanged)
     Q_PROPERTY(bool showEmptyChannels READ getShowEmptyChannels WRITE setShowEmptyChannels NOTIFY showEmptyChannelsChanged)
+    Q_PROPERTY(float magneticDeclination READ getMagneticDeclination WRITE setMagneticDeclination NOTIFY magneticDeclinationChanged)
 public:
     explicit GPSInfoSettings(QObject *parent = 0);
 
@@ -74,6 +75,7 @@ public:
     int getUpdateInterval() {return this->value("updateInterval", 1).toInt();}
     bool getRotate() {return this->value("rotate", true).toBool();}
     bool getShowEmptyChannels() {return this->value("showEmptyChannels", true).toBool();}
+    float getMagneticDeclination() {return this->value("magneticDeclination", 0).toFloat();}
 
     void setCoordinateFormat(QString val) {this->setValue("coordinateFormat", val); emit coordinateFormatChanged(val);}
     void setLocale(QString val) {this->setValue("locale", val); emit localeChanged(val);}
@@ -107,6 +109,7 @@ public:
     void setUpdateInterval(int val) {this->setValue("updateInterval", val); emit updateIntervalChanged(val);}
     void setRotate(bool val) {this->setValue("rotate", val); emit rotateChanged(val);}
     void setShowEmptyChannels(bool val) {this->setValue("showEmptyChannels", val); emit showEmptyChannelsChanged(val);}
+    void setMagneticDeclination(float val) {this->setValue("magneticDeclination", val); emit magneticDeclinationChanged(val);}
 private:
 
 signals:
@@ -142,6 +145,8 @@ signals:
     void updateIntervalChanged(int);
     void rotateChanged(bool);
     void showEmptyChannelsChanged(bool);
+    void magneticDeclinationChanged(float);
+
 public slots:
 
 };
